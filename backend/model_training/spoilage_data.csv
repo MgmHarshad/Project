@@ -1,0 +1,22 @@
+Food_Type,Hours_Since_Prepared,Spoilage_Risk
+Rice,1,Low
+Rice,3,Medium
+Rice,6,High
+Curry,1,Low
+Curry,4,Medium
+Curry,7,High
+Salad,0.5,Low
+Salad,2,Medium
+Salad,4,High
+Bread,1,Low
+Bread,3,Medium
+Bread,6,High
+Milk,0.5,Low
+Milk,2,Medium
+Milk,5,High
+Fried Snacks,1,Low
+Fried Snacks,4,Medium
+Fried Snacks,8,High
+Fruits,1,Low
+Fruits,3,Medium
+Fruits,6,High
