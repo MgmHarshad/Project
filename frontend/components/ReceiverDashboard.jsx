@@ -1,7 +1,4 @@
-import { Sidebar } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { getUser } from "../services/services";
-import { logoutUser } from "../services/services";
 import {
   CircleUserRound,
   Bell,
@@ -14,20 +11,21 @@ import {
   CircleCheck,
   Sprout,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-function DonorDashboard() {
-  const [donor, setDonor] = useState([]);
+import { getUser } from "../services/services";
+import { logoutUser } from "../services/services";
+function ReceiverDashboard() {
+  const [receiver, setReceiver] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchDonor = async () => {
+  const fetchReceiver = async () => {
     try {
       setLoading(true);
       setError(null);
       const res = await getUser();
       console.log("Profile data:", res.data);
-      setDonor(res.data);
+      setReceiver(res.data);
     } catch (err) {
       console.error("Profile fetch error:", err.response?.data || err.message);
       setError(err.response?.data?.error || "Failed to load profile");
@@ -37,7 +35,7 @@ function DonorDashboard() {
   };
 
   useEffect(() => {
-    fetchDonor();
+    fetchReceiver();
   }, []);
 
   // Add this before the return statement
@@ -60,41 +58,41 @@ function DonorDashboard() {
     <div className="font-serif text-green-800">
       <nav className="bg-gray-300 flex h-20 p-2 fixed w-full top-0 rounded-br-lg shadow-md z-20">
         <h1 className="text-4xl font-bold mt-2 ml-4 cursor-pointer">
-          {donor.fullname}
+          {receiver.fullname}
         </h1>
         <Bell
           className="h-10 w-10 cursor-pointer mt-2 ml-auto"
-          onClick={() => (window.location.href = "/donor/notification")}
+          onClick={() => (window.location.href = "/receiver/notification")}
         />
         <CircleUserRound
           className="h-10 w-10 cursor-pointer mt-2 ml-10 mr-4"
-          onClick={() => (window.location.href = "/donor/profile")}
+          onClick={() => (window.location.href = "/receiver/profile")}
         />
       </nav>
       <div className="bg-gray-200 flex flex-col fixed h-full w-60 p-2 mt-20 top-0 rounded-br-lg shadow-md text-center">
         <div
-          onClick={() => (window.location.href = "/donor")}
+          onClick={() => (window.location.href = "/receiver")}
           className="flex gap-2 mt-10 p-2 cursor-pointer text-2xl font-bold"
         >
           <LayoutDashboard />
           <p> Dashboard</p>
         </div>
         <div
-          onClick={() => (window.location.href = "/donor/history")}
+          onClick={() => (window.location.href = "/receiver/history")}
           className="flex gap-2 mt-10 p-2 cursor-pointer text-2xl font-bold"
         >
           <History />
           <p> History</p>
         </div>
         <div
-          onClick={() => (window.location.href = "/donor/showrequests")}
+          onClick={() => (window.location.href = "/receiver/showdonations")}
           className="flex gap-2 mt-10 p-1 cursor-pointer text-2xl font-bold"
         >
           <HandPlatter />
-          <p>Food Requests</p>
+          <p>Donations</p>
         </div>
         <div
-          onClick={() => (window.location.href = "/donor/events")}
+          onClick={() => (window.location.href = "/receiver/events")}
           className="flex gap-2 mt-10 p-2 cursor-pointer text-2xl font-bold"
         >
           <CalendarCheck />
@@ -119,28 +117,28 @@ function DonorDashboard() {
       <div className="flex flex-row gap-10 mt-24 ml-60 p-2">
         <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 w-64 text-center items-center cursor-pointer">
           <HandPlatter size={48} />
-          <p className="text-1xl font-bold">Total Donations</p>
+          <p className="text-1xl font-bold">Total Requests</p>
           <p className="text-1xl font-bold">12</p>
         </div>
         <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 w-64 text-center items-center cursor-pointer">
           <Truck size={48} />
-          <p className="text-1xl font-bold">Pending Donations</p>
+          <p className="text-1xl font-bold">Pending Requests</p>
           <p className="text-1xl font-bold">2</p>
         </div>
         <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 w-64 text-center items-center cursor-pointer">
           <CircleCheck size={48} />
-          <p className="text-1xl font-bold">Matched Donations</p>
+          <p className="text-1xl font-bold">Matched Requests</p>
           <p className="text-1xl font-bold">10</p>
         </div>
         <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 w-64 text-center items-center cursor-pointer">
           <Sprout size={48} />
-          <p className="text-1xl font-bold">Food Saved</p>
+          <p className="text-1xl font-bold">Food Received</p>
           <p className="text-1xl font-bold">130(kg)</p>
         </div>
       </div>
       <div className="flex flex-row gap-8">
         <form className="flex flex-col items-center mt-10 ml-62 w-138 bg-gray-100 p-4 rounded-lg shadow-md mb-4">
-          <h3 className="text-2xl font-bold">Create Donation</h3>
+          <h3 className="text-2xl font-bold">Create Request</h3>
           <input
             type="text"
             placeholder="Food Type"
@@ -185,7 +183,7 @@ function DonorDashboard() {
           </button>
         </form>
         <div className="text-center mt-10 w-136 bg-gray-100 p-4 rounded-lg shadow-md mb-4">
-          <h3 className="text-2xl font-bold">Recent Donations</h3>
+          <h3 className="text-2xl font-bold">Recent Requests</h3>
           <table className="w-full mt-4 rounded-lg shadow-md">
             <thead className="bg-gray-300 text-2xl font-bold rounded-lg">
               <tr className="rounded-md">
@@ -200,19 +198,19 @@ function DonorDashboard() {
                 <th className="p-2">2025-6-1</th>
                 <td className="p-2">Rice</td>
                 <td className="p-2">10kg</td>
-                <td className="p-2">Delivered</td>
+                <td className="p-2">Received</td>
               </tr>
               <tr className="border-b-2 rounded-b-lg">
                 <th className="p-2">2025-6-2</th>
                 <td className="p-2">Veg Curry</td>
                 <td className="p-2">15kg</td>
-                <td className="p-2">Delivered</td>
+                <td className="p-2">Pending</td>
               </tr>
               <tr className="border-b-2 rounded-b-lg">
                 <th className="p-2">2025-6-3</th>
                 <td className="p-2">Rice</td>
                 <td className="p-2">10kg</td>
-                <td className="p-2">Delivered</td>
+                <td className="p-2">Received</td>
               </tr>
             </tbody>
           </table>
@@ -222,4 +220,4 @@ function DonorDashboard() {
   );
 }
 
-export default DonorDashboard;
+export default ReceiverDashboard;

@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Profile from "../../src/Assets/Profile.png";
 import { ChartColumnIncreasing } from "lucide-react";
 import { Medal } from "lucide-react";
 import { History } from "lucide-react";
 import { getUser } from "../../services/services";
 import { logoutUser } from "../../services/services";
-
-function DonorProfile() {
-  const [donor, setDonor] = useState([]);
+function ReceiverProfile() {
+  const [receiver, setReceiver] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchDonor = async () => {
+  const fetchReceiver = async () => {
     try {
       setLoading(true);
       setError(null);
       const res = await getUser();
       console.log("Profile data:", res.data);
-      setDonor(res.data);
+      setReceiver(res.data);
     } catch (err) {
       console.error("Profile fetch error:", err.response?.data || err.message);
       setError(err.response?.data?.error || "Failed to load profile");
@@ -28,7 +27,7 @@ function DonorProfile() {
   };
 
   useEffect(() => {
-    fetchDonor();
+    fetchReceiver();
   }, []);
 
   // Add this before the return statement
@@ -57,8 +56,8 @@ function DonorProfile() {
             className="h-46 w-46 rounded-full"
           />
         </div>
-        <p className="font-bold text-2xl text-center">{donor.fullname}</p>
-        <p className="cursor-pointer text-center">{donor.email}</p>
+        <p className="font-bold text-2xl text-center">{receiver.fullname}</p>
+        <p className="cursor-pointer text-center">{receiver.email}</p>
         <p className="font-sans text-center">9481131520</p>
         <div className="flex flex-row justify-center mt-2">
           <button className="bg-white text-green-800 w-60 h-12 rounded-lg cursor-pointer border">
@@ -153,4 +152,4 @@ function DonorProfile() {
   );
 }
 
-export default DonorProfile;
+export default ReceiverProfile;
