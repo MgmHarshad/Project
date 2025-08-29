@@ -22,6 +22,7 @@ const loginUsers = async (req, res) => {
   return res.json({
     message: "Profile data",
     user,
+    token
   });
 };
 export { loginUsers };

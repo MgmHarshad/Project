@@ -19,3 +19,13 @@ export const getUser = () =>
   axios.get(`${API}/api/user`, {
     withCredentials: true, // ✅ send cookies
   });
+
+export const createDonation = (donation, token) => axios.post(`${API}/api/donation`, donation, {
+  withCredentials: true,
+  headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+})
+
+export const getDonation = () => axios.get(`${API}/api/donation`,{withCredentials: true});

@@ -18,8 +18,11 @@ function Login() {
     e.preventDefault();
     try {
       const response = await loginUser(formData);
+      console.log(response);
       const user = response.data.user;
+      const token = response.data.token;
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
       if (user.role === "donor") {
         navigate("/donor");
       } else if (user.role === "receiver") {

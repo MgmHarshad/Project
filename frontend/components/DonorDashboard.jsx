@@ -2,6 +2,7 @@ import { Sidebar } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { getUser } from "../services/services";
 import { logoutUser } from "../services/services";
+import { createDonation } from "../services/services";
 import {
   CircleUserRound,
   Bell,
@@ -20,6 +21,14 @@ function DonorDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [formData, setFormData] = useState({
+    foodName: "",
+    quantity: "",
+    unit: "",
+    location: "",
+    expiryDuration: "",
+  });
 
   const fetchDonor = async () => {
     try {
@@ -56,6 +65,33 @@ function DonorDashboard() {
       </div>
     );
   }
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    try {
+      const response = await createDonation(formData, token);
+      // const user = response.data.user;
+
+      console.log("Donation Response", response.data); // Debug log
+      alert("Donation successful!");
+      setFormData({
+        foodName: "",
+        quantity: "",
+        unit: "",
+        location: "",
+        expiryDuration: "",
+      });
+      window.location.href = "/donor";
+    } catch (err) {
+      console.error("Donation error:", err.response?.data || err.message);
+      alert("Donation failed: " + (err.response?.data?.error || err.message));
+    }
+  };
   return (
     <div className="font-serif text-green-800">
       <nav className="bg-gray-300 flex h-20 p-2 fixed w-full top-0 rounded-br-lg shadow-md z-20">
@@ -139,40 +175,55 @@ function DonorDashboard() {
         </div>
       </div>
       <div className="flex flex-row gap-8">
-        <form className="flex flex-col items-center mt-10 ml-62 w-138 bg-gray-100 p-4 rounded-lg shadow-md mb-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-center mt-10 ml-62 w-138 bg-gray-100 p-4 rounded-lg shadow-md mb-4"
+        >
           <h3 className="text-2xl font-bold">Create Donation</h3>
           <input
             type="text"
-            placeholder="Food Type"
-            name="foodtype"
+            placeholder="Food Name"
+            name="foodName"
+            value={formData.foodName}
+            onChange={handleChange}
             className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
           />
           <div className="flex flex-row gap-4 mt-2">
             <input
-              type="text"
-              placeholder="Quantity (kg)"
+              type="number"
+              placeholder="Quantity"
               name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
               className="border-b-2 p-2 w-64 mt-4 focus:outline-none focus:border-b-2"
             />
             <input
               type="text"
               placeholder="(Kg, servings)"
+              name="unit"
+              value={formData.unit}
+              onChange={handleChange}
               className="border-b-2 p-2 w-64 mt-4 focus:outline-none focus:border-b-2"
             />
           </div>
           <input
             type="text"
-            placeholder="PickUp Address"
-            name="address"
+            placeholder="Location"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
             className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
           />
-          <textarea
-            name="notes"
-            id="notes"
-            placeholder="Notes"
-            className="border-2 w-full mt-4 p-2 focus:outline-none focus:border-2 rounded-lg"
-          ></textarea>
-          <button
+          <input
+            type="number"
+            placeholder="Expiry Duration"
+            name="expiryDuration"
+            value={formData.expiryDuration}
+            onChange={handleChange}
+            className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
+          />
+          <button 
+            type="submit"
             className="bg-green-800 text-white w-60 h-12 rounded-lg cursor-pointer mt-6"
             onMouseEnter={(e) => {
               e.target.style.scale = "1.05";
