@@ -1,54 +1,46 @@
-import React from "react";
-
+import React, { useState, useEffect } from "react";
+import { getRequests } from "../../services/services";
 function DonorFoodRequests() {
-  let Requests = [
-    {
-        "id": 1,
-      Date: "12-08-2025",
-      Quantity: "25Kg",
-      Food_Type: "Cooked Rice & Dal",
-      Receiver_Organization: "Helping Hands NGO",
-      Location: "Ujire",
-      Status: "Pending",
-    },
-    {
-        "id": 2,
-      Date: "10-08-2025",
-      Quantity: "15 Packs",
-      Food_Type: "Vegetable Pulao",
-      Receiver_Organization: "Hope Street Shelter",
-      Location: "Mangalore",
-      Status: "Pending",
-    },
-    {
-        "id": 3,
-      Date: "08-08-2025",
-      Quantity: "30Kg",
-      Food_Type: "Chapati & Curry",
-      Receiver_Organization: "Feed The Needy Foundation",
-      Location: "Dharmasthala",
-      Status: "Accepted",
-    },
-    {
-        "id": 4,
-      Date: "05-08-2025",
-      Quantity: "20Kg",
-      Food_Type: "Upma",
-      Receiver_Organization: "Joyful Hearts Orphanage",
-      Location: "Belthangady",
-      Status: "Declined",
-    },
-    {
-        "id": 5,
-      Date: "03-08-2025",
-      Quantity: "12Kg",
-      Food_Type: "Fried Rice",
-      Receiver_Organization: "Hunger Free Mission",
-      Location: "Karkala",
-      Status: "Completed",
-    },
-  ];
+  const [Requests, setRequests] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getRequests();
+      console.log("Requests data:", res.data);
+      setRequests(res.data);
+    } catch (err) {
+      console.error("Requests fetch error:", err.response?.data || err.message);
+      setError(err.response?.data?.error || "Failed to load requests");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  // Add this before the return statement
+  if (loading) {
+    return (
+      <div className="font-serif text-green-800 bg-green-200 w-full p-10">
+        Loading requests...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="font-serif text-green-800 bg-green-200 w-full p-10">
+        Error: {error}
+      </div>
+    );
+  }
   return (
     <div className="font-serif text-green-800 bg-green-200 w-full h-screen p-10">
       <div className="bg-green-50 rounded-lg shadow-lg py-2">
@@ -56,24 +48,24 @@ function DonorFoodRequests() {
         <table className="bg-white w-full text-center mt-2">
           <thead>
             <tr className="border-b-2">
-              <th className="p-4">Date</th>
-              <th>Quantity</th>
-              <th>Food Type</th>
-              <th>Receiver Organization</th>
+              <th className="p-4">Receiver Organization</th>
+              <th>People Count</th>
+              <th>Preferred Time</th>
               <th>Location</th>
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>{Requests.map((Request)=>(
-            <tr key={Request.id}>
-                <td className="p-4">{Request.Date}</td>
-                <td>{Request.Quantity}</td>
-                <td>{Request.Food_Type}</td>
-                <td>{Request.Receiver_Organization}</td>
-                <td>{Request.Location}</td>
-                <td>{Request.Status}</td>
-            </tr>
-          ))}</tbody>
+          <tbody>
+            {Requests.map((Request) => (
+              <tr key={Request.id}>
+                <td className="p-4">{Request.receiver.fullname}</td>
+                <td>{Request.peopleCount}</td>
+                <td>{Request.preferredTime}</td>
+                <td>{Request.location}</td>
+                <td>{Request.status}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </div>

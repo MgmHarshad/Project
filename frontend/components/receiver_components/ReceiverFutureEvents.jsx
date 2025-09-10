@@ -1,55 +1,47 @@
 import React from "react";
-
+import { getEvents } from "../../services/services";
+import { useState, useEffect } from "react";
 function ReceiverFutureEvents() {
-  let Events = [
-    {
-      id: 1,
-      Event_Name: "Ganesh Chaturthi Maha Prasad Distribution",
-      Date: "08-09-2025",
-      Location: "Shivaji Nagar Community Hall",
-      Organizer: "Shree Ganesh Seva Mandal",
-    },
+  const [events, setEvents] = useState([]);
 
-    {
-      id: 2,
-      Event_Name: "Corporate Annual Day Dinner",
-      Date: "15-09-2025",
-      Location: "Radisson Blu Hotel, Bengaluru",
-      Organizer: "TechVision Pvt Ltd",
-    },
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    {
-      id: 3,
-      Event_Name: "Celebrity Wedding Reception",
-      Date: "22-09-2025",
-      Location: "Royal Orchid Palace",
-      Organizer: "SR Event Planners",
-    },
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getEvents();
+      console.log("Donation data:", res.data);
+      setEvents(res.data);
+    } catch (err) {
+      console.error("Event fetch error:", err.response?.data || err.message);
+      setError(err.response?.data?.error || "Failed to load events");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    {
-      id: 4,
-      Event_Name: "Durga Puja Community Feast",
-      Date: "05-10-2025",
-      Location: "Bengal Association Ground",
-      Organizer: "Bengal Cultural Society",
-    },
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
-    {
-      id: 5,
-      Event_Name: "College Fest Food Stalls",
-      Date: "12-10-2025",
-      Location: "BMS College Campus",
-      Organizer: "BMS Cultural Committee",
-    },
+  // Add this before the return statement
+  if (loading) {
+    return (
+      <div className="font-serif text-green-800 bg-green-200 w-full p-10">
+        Loading Events...
+      </div>
+    );
+  }
 
-    {
-      id: 6,
-      Event_Name: "Diwali Corporate Lunch",
-      Date: "22-10-2025",
-      Location: "IT Park Food Court",
-      Organizer: "GlobalSoft Solutions",
-    },
-  ];
+  if (error) {
+    return (
+      <div className="font-serif text-green-800 bg-green-200 w-full p-10">
+        Error: {error}
+      </div>
+    );
+  }
   return (
     <div className="font-serif text-green-800 bg-green-200 w-full h-screen p-10">
       <div className="bg-green-50 rounded-lg shadow-lg py-2">
@@ -57,19 +49,21 @@ function ReceiverFutureEvents() {
         <table className="bg-white w-full text-center mt-2">
           <thead>
             <tr className="border-b-2">
-              <th className="p-4">Event Name</th>
+              <th className="p-4">Organizer</th>
+              <th>Event Name</th>
               <th>Date</th>
               <th>Location</th>
-              <th>Organizer</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {Events.map((Event) => (
-              <tr key={Event.id}>
-                <td className="p-4">{Event.Event_Name}</td>
-                <td>{Event.Date}</td>
-                <td>{Event.Location}</td>
-                <td>{Event.Organizer}</td>
+            {events.map((event) => (
+              <tr key={event._id || event.id}>
+                <td className="p-4">{event.organizer.fullname}</td>
+                <td>{event.eventName}</td>
+                <td>{event.date}</td>
+                <td>{event.location}</td>
+                <td>{event.status}</td>
               </tr>
             ))}
           </tbody>

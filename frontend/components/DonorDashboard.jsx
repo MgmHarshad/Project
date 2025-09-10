@@ -1,8 +1,10 @@
-import { Sidebar } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { getUser } from "../services/services";
-import { logoutUser } from "../services/services";
-import { createDonation } from "../services/services";
+import {
+  getUser,
+  logoutUser,
+  createDonation,
+  getMyDonations,
+} from "../services/services";
 import {
   CircleUserRound,
   Bell,
@@ -18,6 +20,8 @@ import {
 import { Link } from "react-router-dom";
 function DonorDashboard() {
   const [donor, setDonor] = useState([]);
+
+  const [Donations, setDonations] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,8 +49,28 @@ function DonorDashboard() {
     }
   };
 
+  const fetchMyDonations = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getMyDonations(token);
+      console.log("Donation data:", res.data);
+      setDonations(res.data);
+    } catch (err) {
+      console.error(
+        "Donations fetch error:",
+        err.response?.data || err.message
+      );
+      setError(err.response?.data?.error || "Failed to load donations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDonor();
+    fetchMyDonations();
   }, []);
 
   // Add this before the return statement
@@ -174,10 +198,10 @@ function DonorDashboard() {
           <p className="text-1xl font-bold">130(kg)</p>
         </div>
       </div>
-      <div className="flex flex-row gap-8">
+      <div className="w-280">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col items-center mt-10 ml-62 w-138 bg-gray-100 p-4 rounded-lg shadow-md mb-4"
+          className="flex flex-col items-center mt-10 ml-62 w-full bg-gray-100 p-4 rounded-lg shadow-md mb-4"
         >
           <h3 className="text-2xl font-bold">Create Donation</h3>
           <input
@@ -188,14 +212,14 @@ function DonorDashboard() {
             onChange={handleChange}
             className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
           />
-          <div className="flex flex-row gap-4 mt-2">
+          <div className="flex flex-row gap-2 mt-2">
             <input
               type="number"
               placeholder="Quantity"
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
-              className="border-b-2 p-2 w-64 mt-4 focus:outline-none focus:border-b-2"
+              className="border-b-2 p-2 w-134 mt-4 focus:outline-none focus:border-b-2"
             />
             <input
               type="text"
@@ -203,7 +227,7 @@ function DonorDashboard() {
               name="unit"
               value={formData.unit}
               onChange={handleChange}
-              className="border-b-2 p-2 w-64 mt-4 focus:outline-none focus:border-b-2"
+              className="border-b-2 p-2 w-134 mt-4 focus:outline-none focus:border-b-2"
             />
           </div>
           <input
@@ -222,7 +246,7 @@ function DonorDashboard() {
             onChange={handleChange}
             className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
           />
-          <button 
+          <button
             type="submit"
             className="bg-green-800 text-white w-60 h-12 rounded-lg cursor-pointer mt-6"
             onMouseEnter={(e) => {
@@ -235,39 +259,35 @@ function DonorDashboard() {
             Submit
           </button>
         </form>
-        <div className="text-center mt-10 w-136 bg-gray-100 p-4 rounded-lg shadow-md mb-4">
-          <h3 className="text-2xl font-bold">Recent Donations</h3>
-          <table className="w-full mt-4 rounded-lg shadow-md">
-            <thead className="bg-gray-300 text-2xl font-bold rounded-lg">
-              <tr className="rounded-md">
-                <th className="p-2">Date</th>
-                <th className="p-2">Food Type</th>
-                <th className="p-2">Quantity (kg)</th>
-                <th className="p-2">Status</th>
+      </div>
+      <div className="text-center mt-10 w-280 bg-gray-100 p-4 rounded-lg shadow-md mb-4 ml-62">
+        <h3 className="text-2xl font-bold">Recent Donations</h3>
+        <table className="w-full mt-4 rounded-lg shadow-md">
+          <thead className="bg-gray-300 text-2xl font-bold rounded-lg">
+            <tr className="rounded-md">
+              <th className="p-2">Food Name</th>
+              <th>Quantity</th>
+              <th>Unit</th>
+              <th>Location</th>
+              <th>Expiry Time</th>
+              <th>Status</th>
+              <th>Receiver Organization</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Donations.map((Donation) => (
+              <tr key={Donation.id} className="border-b-2 rounded-b-lg">
+                <td className="p-4">{Donation.foodName}</td>
+                <td>{Donation.quantity}</td>
+                <td>{Donation.unit}</td>
+                <td>{Donation.location}</td>
+                <td>{Donation.expiryTime}</td>
+                <td>{Donation.status}</td>
+                <td></td>
               </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b-2 rounded-b-lg">
-                <th className="p-2">2025-6-1</th>
-                <td className="p-2">Rice</td>
-                <td className="p-2">10kg</td>
-                <td className="p-2">Delivered</td>
-              </tr>
-              <tr className="border-b-2 rounded-b-lg">
-                <th className="p-2">2025-6-2</th>
-                <td className="p-2">Veg Curry</td>
-                <td className="p-2">15kg</td>
-                <td className="p-2">Delivered</td>
-              </tr>
-              <tr className="border-b-2 rounded-b-lg">
-                <th className="p-2">2025-6-3</th>
-                <td className="p-2">Rice</td>
-                <td className="p-2">10kg</td>
-                <td className="p-2">Delivered</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -11,13 +11,25 @@ import {
   CircleCheck,
   Sprout,
 } from "lucide-react";
-import { getUser } from "../services/services";
-import { logoutUser } from "../services/services";
+import {
+  getUser,
+  logoutUser,
+  createRequest,
+  getMyRequests,
+} from "../services/services";
 function ReceiverDashboard() {
   const [receiver, setReceiver] = useState([]);
 
+  const [Requests, setRequests] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [formData, setFormData] = useState({
+    peopleCount: "",
+    preferredTime: "",
+    location: "",
+  });
 
   const fetchReceiver = async () => {
     try {
@@ -34,8 +46,25 @@ function ReceiverDashboard() {
     }
   };
 
+  const fetchMyRequests = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getMyRequests(token);
+      console.log("Request data:", res.data);
+      setRequests(res.data);
+    } catch (err) {
+      console.error("Requests fetch error:", err.response?.data || err.message);
+      setError(err.response?.data?.error || "Failed to load requests");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchReceiver();
+    fetchMyRequests();
   }, []);
 
   // Add this before the return statement
@@ -54,6 +83,31 @@ function ReceiverDashboard() {
       </div>
     );
   }
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    try {
+      const response = await createRequest(formData, token);
+      // const user = response.data.user;
+
+      console.log("Request Response", response.data); // Debug log
+      alert("Request Created successful!");
+      setFormData({
+        peopleCount: "",
+        preferredTime: "",
+        location: "",
+      });
+      window.location.href = "/receiver";
+    } catch (err) {
+      console.error("Request error:", err.response?.data || err.message);
+      alert("Request failed: " + (err.response?.data?.error || err.message));
+    }
+  };
   return (
     <div className="font-serif text-green-800">
       <nav className="bg-gray-300 flex h-20 p-2 fixed w-full top-0 rounded-br-lg shadow-md z-20">
@@ -136,41 +190,38 @@ function ReceiverDashboard() {
           <p className="text-1xl font-bold">130(kg)</p>
         </div>
       </div>
-      <div className="flex flex-row gap-8">
-        <form className="flex flex-col items-center mt-10 ml-62 w-138 bg-gray-100 p-4 rounded-lg shadow-md mb-4">
-          <h3 className="text-2xl font-bold">Create Request</h3>
+      <div className="w-280">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-center mt-10 ml-62 w-full bg-gray-100 p-4 rounded-lg shadow-md mb-4"
+        >
+          <h3 className="text-2xl font-bold">Create Donation</h3>
           <input
-            type="text"
-            placeholder="Food Type"
-            name="foodtype"
+            type="number"
+            placeholder="People Count"
+            name="peopleCount"
+            value={formData.peopleCount}
+            onChange={handleChange}
             className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
           />
-          <div className="flex flex-row gap-4 mt-2">
-            <input
-              type="text"
-              placeholder="Quantity (kg)"
-              name="quantity"
-              className="border-b-2 p-2 w-64 mt-4 focus:outline-none focus:border-b-2"
-            />
-            <input
-              type="text"
-              placeholder="(Kg, servings)"
-              className="border-b-2 p-2 w-64 mt-4 focus:outline-none focus:border-b-2"
-            />
-          </div>
           <input
-            type="text"
-            placeholder="PickUp Address"
-            name="address"
+            type="date"
+            placeholder="Preferred Time"
+            name="preferredTime"
+            value={formData.preferredTime}
+            onChange={handleChange}
             className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
           />
-          <textarea
-            name="notes"
-            id="notes"
-            placeholder="Notes"
-            className="border-2 w-full mt-4 p-2 focus:outline-none focus:border-2 rounded-lg"
-          ></textarea>
+          <input
+            type="text"
+            placeholder="Location"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
+          />
           <button
+            type="submit"
             className="bg-green-800 text-white w-60 h-12 rounded-lg cursor-pointer mt-6"
             onMouseEnter={(e) => {
               e.target.style.scale = "1.05";
@@ -182,39 +233,31 @@ function ReceiverDashboard() {
             Submit
           </button>
         </form>
-        <div className="text-center mt-10 w-136 bg-gray-100 p-4 rounded-lg shadow-md mb-4">
-          <h3 className="text-2xl font-bold">Recent Requests</h3>
-          <table className="w-full mt-4 rounded-lg shadow-md">
-            <thead className="bg-gray-300 text-2xl font-bold rounded-lg">
-              <tr className="rounded-md">
-                <th className="p-2">Date</th>
-                <th className="p-2">Food Type</th>
-                <th className="p-2">Quantity (kg)</th>
-                <th className="p-2">Status</th>
+      </div>
+      <div className="text-center mt-10 w-280 bg-gray-100 p-4 rounded-lg shadow-md mb-4 ml-62">
+        <h3 className="text-2xl font-bold">Recent Donations</h3>
+        <table className="w-full mt-4 rounded-lg shadow-md">
+          <thead className="bg-gray-300 text-2xl font-bold rounded-lg">
+            <tr className="rounded-md">
+              <th className="p-2">People Count</th>
+              <th>Prefered Time</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Receiver Organization</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Requests.map((Request) => (
+              <tr key={Request.id} className="border-b-2 rounded-b-lg">
+                <td className="p-4">{Request.peopleCount}</td>
+                <td>{Request.preferredTime}</td>
+                <td>{Request.location}</td>
+                <td>{Request.status}</td>
+                <td></td>
               </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b-2 rounded-b-lg">
-                <th className="p-2">2025-6-1</th>
-                <td className="p-2">Rice</td>
-                <td className="p-2">10kg</td>
-                <td className="p-2">Received</td>
-              </tr>
-              <tr className="border-b-2 rounded-b-lg">
-                <th className="p-2">2025-6-2</th>
-                <td className="p-2">Veg Curry</td>
-                <td className="p-2">15kg</td>
-                <td className="p-2">Pending</td>
-              </tr>
-              <tr className="border-b-2 rounded-b-lg">
-                <th className="p-2">2025-6-3</th>
-                <td className="p-2">Rice</td>
-                <td className="p-2">10kg</td>
-                <td className="p-2">Received</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
