@@ -1,47 +1,95 @@
+# train_model.py
+import numpy as np
 import pandas as pd
 import tensorflow as tf
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, accuracy_score
+import joblib
+import os
 
-# Load data
-df = pd.read_csv("spoilage_data.csv")
+# reproducibility
+SEED = 42
+np.random.seed(SEED)
+tf.random.set_seed(SEED)
 
-# Encode food type
-food_encoder = LabelEncoder()
-df['food_type_encoded'] = food_encoder.fit_transform(df['Food_Type'])
+# paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CSV_PATH = os.path.join(BASE_DIR, "spoilage_data_expanded.csv")  # use expanded dataset
+MODEL_PATH = os.path.join(BASE_DIR, "spoilage_model.h5")
+OHE_PATH = os.path.join(BASE_DIR, "food_ohe.pkl")
+SCALER_PATH = os.path.join(BASE_DIR, "hours_scaler.pkl")
+INVERSE_MAP_PATH = os.path.join(BASE_DIR, "inverse_risk_mapping.pkl")
 
-# Encode spoilage risk (target)
-risk_encoder = LabelEncoder()
-df['spoilage_risk_encoded'] = risk_encoder.fit_transform(df['Spoilage_Risk'])
+# load data
+df = pd.read_csv(CSV_PATH)
 
-# Features and target
-X = df[['food_type_encoded', 'Hours_Since_Prepared']]
-y = df['spoilage_risk_encoded']
+# risk mapping (explicit order)
+risk_mapping = {"Low": 0, "Medium": 1, "High": 2}
+inverse_risk_mapping = {v: k for k, v in risk_mapping.items()}
+df['y'] = df['Spoilage_Risk'].map(risk_mapping)
 
-# Split for training/testing
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# one-hot encode Food_Type
+ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+X_food = ohe.fit_transform(df[['Food_Type']])
 
-# Build a small neural network
+# scale Hours
+scaler = StandardScaler()
+X_hours = scaler.fit_transform(df[['Hours_Since_Prepared']])
+
+# combine features
+X = np.hstack([X_food, X_hours])
+y = df['y'].values
+
+# train/test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=SEED, stratify=y
+)
+
+# build model
+input_shape = X_train.shape[1]
 model = tf.keras.Sequential([
-    tf.keras.layers.Input(shape=(2,)),  # 2 features
-    tf.keras.layers.Dense(16, activation='relu'),
-    tf.keras.layers.Dense(8, activation='relu'),
-    tf.keras.layers.Dense(3, activation='softmax')  # 3 classes: Low, Medium, High
+    tf.keras.layers.Input(shape=(input_shape,)),
+    tf.keras.layers.Dense(64, activation='relu'),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(32, activation='relu'),
+    tf.keras.layers.Dense(3, activation='softmax')  # 3 classes
 ])
 
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
 
-# Train the model
-model.fit(X_train, y_train, epochs=50, batch_size=4, validation_data=(X_test, y_test))
+# early stopping
+es = tf.keras.callbacks.EarlyStopping(
+    monitor='val_loss', patience=15, restore_best_weights=True
+)
 
-# Save the model in TensorFlow SavedModel format
-model.save("spoilage_model.h5")
+# train
+history = model.fit(
+    X_train, y_train,
+    validation_data=(X_test, y_test),
+    epochs=300,
+    batch_size=8,
+    callbacks=[es],
+    verbose=1
+)
 
+# evaluate
+y_pred = np.argmax(model.predict(X_test), axis=1)
+print("✅ Test accuracy:", accuracy_score(y_test, y_pred))
+print("✅ Classification report:\n", classification_report(y_test, y_pred, target_names=["Low","Medium","High"]))
 
+# save model and preprocessors
+model.save(MODEL_PATH)
+joblib.dump(ohe, OHE_PATH)
+joblib.dump(scaler, SCALER_PATH)
+joblib.dump(inverse_risk_mapping, INVERSE_MAP_PATH)
 
-# Also save encoders for later (if needed)
-import joblib
-joblib.dump(food_encoder, "food_encoder.pkl")
-joblib.dump(risk_encoder, "risk_encoder.pkl")
-
-print("✅ Model and encoders saved!")
+print("\n📦 Saved files:")
+print(" -", MODEL_PATH)
+print(" -", OHE_PATH)
+print(" -", SCALER_PATH)
+print(" -", INVERSE_MAP_PATH)

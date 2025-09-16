@@ -1,0 +1,115 @@
+Food_Type,Hours_Since_Prepared,Spoilage_Risk
+Rice,1.0,Low
+Rice,1.5,Low
+Rice,2.0,Low
+Rice,2.5,Low
+Rice,3.0,Medium
+Rice,3.5,Medium
+Rice,4.0,Medium
+Rice,4.5,Medium
+Rice,5.0,Medium
+Rice,5.5,Medium
+Rice,6.0,High
+Rice,6.5,High
+Rice,7.0,High
+Rice,7.5,High
+Rice,8.0,High
+Rice,8.5,High
+Curry,1.0,Low
+Curry,1.5,Low
+Curry,2.0,Low
+Curry,2.5,Low
+Curry,3.0,Low
+Curry,3.5,Low
+Curry,4.0,Medium
+Curry,4.5,Medium
+Curry,5.0,Medium
+Curry,5.5,Medium
+Curry,6.0,Medium
+Curry,6.5,Medium
+Curry,7.0,High
+Curry,7.5,High
+Curry,8.0,High
+Curry,8.5,High
+Curry,9.0,High
+Curry,9.5,High
+Salad,0.5,Low
+Salad,1.0,Low
+Salad,1.5,Low
+Salad,2.0,Medium
+Salad,2.5,Medium
+Salad,3.0,Medium
+Salad,3.5,Medium
+Salad,4.0,High
+Salad,4.5,High
+Salad,5.0,High
+Salad,5.5,High
+Salad,6.0,High
+Salad,6.5,High
+Bread,1.0,Low
+Bread,1.5,Low
+Bread,2.0,Low
+Bread,2.5,Low
+Bread,3.0,Medium
+Bread,3.5,Medium
+Bread,4.0,Medium
+Bread,4.5,Medium
+Bread,5.0,Medium
+Bread,5.5,Medium
+Bread,6.0,High
+Bread,6.5,High
+Bread,7.0,High
+Bread,7.5,High
+Bread,8.0,High
+Bread,8.5,High
+Milk,0.5,Low
+Milk,1.0,Low
+Milk,1.5,Low
+Milk,2.0,Medium
+Milk,2.5,Medium
+Milk,3.0,Medium
+Milk,3.5,Medium
+Milk,4.0,Medium
+Milk,4.5,Medium
+Milk,5.0,High
+Milk,5.5,High
+Milk,6.0,High
+Milk,6.5,High
+Milk,7.0,High
+Milk,7.5,High
+Fried Snacks,1.0,Low
+Fried Snacks,1.5,Low
+Fried Snacks,2.0,Low
+Fried Snacks,2.5,Low
+Fried Snacks,3.0,Low
+Fried Snacks,3.5,Low
+Fried Snacks,4.0,Medium
+Fried Snacks,4.5,Medium
+Fried Snacks,5.0,Medium
+Fried Snacks,5.5,Medium
+Fried Snacks,6.0,Medium
+Fried Snacks,6.5,Medium
+Fried Snacks,7.0,Medium
+Fried Snacks,7.5,Medium
+Fried Snacks,8.0,High
+Fried Snacks,8.5,High
+Fried Snacks,9.0,High
+Fried Snacks,9.5,High
+Fried Snacks,10.0,High
+Fried Snacks,10.5,High
+Fruits,1.0,Low
+Fruits,1.5,Low
+Fruits,2.0,Low
+Fruits,2.5,Low
+Fruits,3.0,Medium
+Fruits,3.5,Medium
+Fruits,4.0,Medium
+Fruits,4.5,Medium
+Fruits,5.0,Medium
+Fruits,5.5,Medium
+Fruits,6.0,High
+Fruits,6.5,High
+Fruits,7.0,High
+Fruits,7.5,High
+Fruits,8.0,High
+Fruits,8.5,High
