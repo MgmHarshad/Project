@@ -1,6 +1,6 @@
 import express from "express";
 import Donations from "../models/donation.models.js";
-
+import axios from 'axios';
 const createDonation = async (req, res) => {
   try {
     // `req.user` should already be populated by your authMiddleware
@@ -20,9 +20,18 @@ const createDonation = async (req, res) => {
       receiver,
     } = req.body;
 
-    // Validate required fields manually (extra safety)
-    if (!foodName || !quantity || !unit || !location || !expiryDuration) {
-      return res.status(400).json({ message: "Missing required fields" });
+    // ML enrichment from middleware (optional but preferred)
+    const ml = req.mlPrediction || {};
+
+    // Determine expiryDuration: prefer ML remaining time; fallback to provided value
+    let computedExpiryDuration =
+      typeof ml.remaining_fresh_hours === 'number' && Number.isFinite(ml.remaining_fresh_hours)
+        ? Math.max(0, ml.remaining_fresh_hours)
+        : expiryDuration;
+
+    // Validate required fields (allow expiryDuration to be set by ML)
+    if (!foodName || !quantity || !unit || !location || (computedExpiryDuration === undefined || computedExpiryDuration === null)) {
+      return res.status(400).json({ message: "Missing required fields (expiryDuration can be auto-filled by ML if available)" });
     }
 
     // Create donation document
@@ -32,9 +41,11 @@ const createDonation = async (req, res) => {
       quantity,
       unit,
       location,
-      expiryDuration,
+      expiryDuration: computedExpiryDuration,
       status,
       receiver,
+      spoilageRisk: ml.spoilage_risk,
+      remainingFreshHours: ml.remaining_fresh_hours,
     });
 
     await donation.save();
@@ -42,6 +53,7 @@ const createDonation = async (req, res) => {
     res.status(201).json({
       message: "Donation created successfully",
       donation,
+      mlPrediction: ml,
     });
   } catch (error) {
     console.error("Donation creation error:", error);

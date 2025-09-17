@@ -6,8 +6,9 @@ import {
   getMyDonations,
 } from "../controllers/donation.controllers.js";
 import { authMiddleware } from "../middlewares/auth.middlewares.js";
+import { mlPredictionMiddleware } from "../middlewares/ml.middleware.js";
 
-router.post("/donation", authMiddleware, createDonation);
+router.post("/donation", authMiddleware, mlPredictionMiddleware, createDonation);
 
 router.get("/donation", getDonation);
 

@@ -31,7 +31,7 @@ function DonorDashboard() {
     quantity: "",
     unit: "",
     location: "",
-    expiryDuration: "",
+    hoursSincePrepared: "",
   });
 
   const fetchDonor = async () => {
@@ -98,17 +98,33 @@ function DonorDashboard() {
     e.preventDefault();
     const token = localStorage.getItem("token");
     try {
-      const response = await createDonation(formData, token);
+      const payload = {
+        foodName: formData.foodName,
+        quantity: Number(formData.quantity),
+        unit: formData.unit,
+        location: formData.location,
+        hoursSincePrepared:
+          formData.hoursSincePrepared === ""
+            ? undefined
+            : Number(formData.hoursSincePrepared),
+      };
+
+      const response = await createDonation(payload, token);
       // const user = response.data.user;
 
       console.log("Donation Response", response.data); // Debug log
-      alert("Donation successful!");
+      const ml = response.data?.mlPrediction;
+      const usedExpiry = response.data?.donation?.expiryDuration;
+      const msg = ml?.spoilage_risk
+        ? `Donation successful! Risk: ${ml.spoilage_risk}, Remaining: ${ml.remaining_fresh_hours}h, Expiry set to: ${usedExpiry}h`
+        : `Donation successful! Expiry set to: ${usedExpiry}h`;
+      alert(msg);
       setFormData({
         foodName: "",
         quantity: "",
         unit: "",
         location: "",
-        expiryDuration: "",
+        hoursSincePrepared: "",
       });
       window.location.href = "/donor";
     } catch (err) {
@@ -221,14 +237,18 @@ function DonorDashboard() {
               onChange={handleChange}
               className="border-b-2 p-2 w-134 mt-4 focus:outline-none focus:border-b-2"
             />
-            <input
-              type="text"
-              placeholder="(Kg, servings)"
+            <select
               name="unit"
               value={formData.unit}
               onChange={handleChange}
-              className="border-b-2 p-2 w-134 mt-4 focus:outline-none focus:border-b-2"
-            />
+              className="border-b-2 p-2 w-134 mt-4 focus:outline-none focus:border-b-2 bg-white"
+            >
+              <option value="" disabled>Select Unit</option>
+              <option value="Kg">Kg</option>
+              <option value="Litres">Litres</option>
+              <option value="Pieces">Pieces</option>
+              <option value="Packets">Packets</option>
+            </select>
           </div>
           <input
             type="text"
@@ -240,9 +260,9 @@ function DonorDashboard() {
           />
           <input
             type="number"
-            placeholder="Expiry Duration"
-            name="expiryDuration"
-            value={formData.expiryDuration}
+            placeholder="Hours Since Prepared (optional)"
+            name="hoursSincePrepared"
+            value={formData.hoursSincePrepared}
             onChange={handleChange}
             className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
           />
@@ -270,6 +290,7 @@ function DonorDashboard() {
               <th>Unit</th>
               <th>Location</th>
               <th>Expiry Time</th>
+              {/* <th>Risk</th> */}
               <th>Status</th>
               <th>Receiver Organization</th>
             </tr>
@@ -282,6 +303,7 @@ function DonorDashboard() {
                 <td>{Donation.unit}</td>
                 <td>{Donation.location}</td>
                 <td>{Donation.expiryTime}</td>
+                {/* <td>{Donation.spoilageRisk ?? "-"}</td> */}
                 <td>{Donation.status}</td>
                 <td></td>
               </tr>

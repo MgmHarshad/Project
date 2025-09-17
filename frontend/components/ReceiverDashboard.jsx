@@ -195,7 +195,7 @@ function ReceiverDashboard() {
           onSubmit={handleSubmit}
           className="flex flex-col items-center mt-10 ml-62 w-full bg-gray-100 p-4 rounded-lg shadow-md mb-4"
         >
-          <h3 className="text-2xl font-bold">Create Donation</h3>
+          <h3 className="text-2xl font-bold">Create Request</h3>
           <input
             type="number"
             placeholder="People Count"
@@ -235,7 +235,7 @@ function ReceiverDashboard() {
         </form>
       </div>
       <div className="text-center mt-10 w-280 bg-gray-100 p-4 rounded-lg shadow-md mb-4 ml-62">
-        <h3 className="text-2xl font-bold">Recent Donations</h3>
+        <h3 className="text-2xl font-bold">Recent Requests</h3>
         <table className="w-full mt-4 rounded-lg shadow-md">
           <thead className="bg-gray-300 text-2xl font-bold rounded-lg">
             <tr className="rounded-md">

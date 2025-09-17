@@ -57,6 +57,7 @@ function DonorHistory() {
               <th>Unit</th>
               <th>Location</th>
               <th>Expiry Time</th>
+              <th>Risk</th>
               <th>Status</th>
               <th>Receiver Organization</th>
             </tr>
@@ -69,6 +70,7 @@ function DonorHistory() {
                 <td>{Donation.unit}</td>
                 <td>{Donation.location}</td>
                 <td>{Donation.expiryTime}</td>
+                <td>{Donation.spoilageRisk ?? "-"}</td>
                 <td>{Donation.status}</td>
                 <td></td>
               </tr>

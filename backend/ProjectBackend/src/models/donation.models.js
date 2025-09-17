@@ -48,6 +48,15 @@ let donationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
     },
+    // ML-enriched fields
+    spoilageRisk: {
+      type: String,
+      enum: ["Low", "Medium", "High"],
+    },
+    remainingFreshHours: {
+      type: Number,
+      min: 0,
+    },
   },
   { timestamps: true }
 );
