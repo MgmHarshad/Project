@@ -100,3 +100,124 @@ export const getMyRequests = (token) =>
       "Content-Type": "application/json",
     },
   });
+
+// Notifications
+export const getNotifications = (token) =>
+  axios.get(`${API}/api/notifications`, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const markNotificationRead = (id, token) =>
+  axios.patch(`${API}/api/notifications/${id}/read`, {}, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const markAllNotificationsRead = (token) =>
+  axios.patch(`${API}/api/notifications/read-all`, {}, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+// Donation status management
+export const getAvailableDonations = (token) =>
+  axios.get(`${API}/api/donations/available`, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const claimDonation = (id, token) =>
+  axios.patch(`${API}/api/donations/${id}/claim`, {}, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const deliverDonation = (id, token) =>
+  axios.patch(`${API}/api/donations/${id}/deliver`, {}, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const getMyClaimedDonations = (token) =>
+  axios.get(`${API}/api/donations/my-claimed`, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+// Request status management
+export const getAvailableRequests = (token) =>
+  axios.get(`${API}/api/requests/available`, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const acceptRequest = (id, token) =>
+  axios.patch(`${API}/api/requests/${id}/accept`, {}, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const deliverRequest = (id, token) =>
+  axios.patch(`${API}/api/requests/${id}/deliver`, {}, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const getMyAcceptedRequests = (token) =>
+  axios.get(`${API}/api/requests/my-accepted`, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+// Statistics
+export const getDonorStats = (token) =>
+  axios.get(`${API}/api/stats/donor`, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+export const getReceiverStats = (token) =>
+  axios.get(`${API}/api/stats/receiver`, {
+    withCredentials: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });

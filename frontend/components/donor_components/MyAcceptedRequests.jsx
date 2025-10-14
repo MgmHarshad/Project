@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
-  createEvents,
-  getMyEvents,
+  getMyAcceptedRequests,
+  deliverRequest,
   getUser,
   logoutUser,
 } from "../../services/services";
@@ -17,22 +17,14 @@ import {
   CircleCheck,
   Sprout,
 } from "lucide-react";
-function DonorFutureEvents() {
+
+function MyAcceptedRequests() {
   const [donor, setDonor] = useState([]);
 
-  const [formData, setFormData] = useState({
-    eventName: "",
-    date: "",
-    location: "",
-  });
-  const [events, setEvents] = useState([]);
-
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const [delivering, setDelivering] = useState({});
 
   const fetchDonor = async () => {
     try {
@@ -49,56 +41,58 @@ function DonorFutureEvents() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("=== EVENT FORM SUBMITTED ===");
-    const token = localStorage.getItem("token");
-    try {
-      const response = await createEvents(formData, token);
-      // const user = response.data.user;
-
-      console.log("Event Creation Response", response.data); // Debug log
-      alert("Donation successful!");
-      setFormData({
-        eventName: "",
-        date: "",
-        location: "",
-      });
-      window.location.href = "/donor/events";
-    } catch (err) {
-      console.error("Event Creation error:", err.response?.data || err.message);
-      alert(
-        "Event Creation failed: " + (err.response?.data?.error || err.message)
-      );
-    }
-  };
-
-  const fetchMyEvents = async () => {
+  const fetchAcceptedRequests = async () => {
     const token = localStorage.getItem("token");
     try {
       setLoading(true);
       setError(null);
-      const res = await getMyEvents(token);
-      console.log("Events data:", res.data);
-      setEvents(res.data);
+      const res = await getMyAcceptedRequests(token);
+      console.log("Accepted requests data:", res.data);
+      setRequests(res.data);
     } catch (err) {
-      console.error("Event fetch error:", err.response?.data || err.message);
-      setError(err.response?.data?.error || "Failed to load events");
+      console.error(
+        "Accepted requests fetch error:",
+        err.response?.data || err.message
+      );
+      setError(err.response?.data?.error || "Failed to load accepted requests");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDeliverRequest = async (requestId) => {
+    const token = localStorage.getItem("token");
+    try {
+      setDelivering((prev) => ({ ...prev, [requestId]: true }));
+      console.log(`Marking request ${requestId} as delivered`);
+
+      const response = await deliverRequest(requestId, token);
+      console.log("Deliver response:", response.data);
+
+      alert("Request marked as delivered successfully!");
+
+      // Refresh the requests list
+      await fetchAcceptedRequests();
+    } catch (err) {
+      console.error("Deliver error:", err.response?.data || err.message);
+      alert(
+        "Failed to mark request as delivered: " +
+          (err.response?.data?.message || err.message)
+      );
+    } finally {
+      setDelivering((prev) => ({ ...prev, [requestId]: false }));
+    }
+  };
+
   useEffect(() => {
     fetchDonor();
-    fetchMyEvents();
+    fetchAcceptedRequests();
   }, []);
 
-  // Add this before the return statement
   if (loading) {
     return (
       <div className="font-serif text-green-800 bg-green-200 w-full p-10">
-        Loading Events...
+        Loading accepted requests...
       </div>
     );
   }
@@ -181,71 +175,75 @@ function DonorFutureEvents() {
         </div>
       </div>
       <div className="font-serif text-green-800 bg-white w-280 h-screen p-2 ml-60 mt-24">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col items-center w-full bg-gray-100 p-4 rounded-lg shadow-md"
-        >
-          <h3 className="text-2xl font-bold">Create Future Event</h3>
-          <input
-            type="text"
-            placeholder="Event Name"
-            name="eventName"
-            value={formData.eventName}
-            onChange={handleChange}
-            className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
-          />
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
-          />
-          <input
-            type="text"
-            placeholder="Location"
-            name="location"
-            value={formData.location}
-            onChange={handleChange}
-            className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2"
-          />
-          <button
-            type="submit"
-            className="bg-green-800 text-white w-60 h-12 rounded-lg cursor-pointer mt-6"
-            onMouseEnter={(e) => {
-              e.target.style.scale = "1.05";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.scale = "1";
-            }}
-          >
-            Submit
-          </button>
-        </form>
-        <div className="bg-gray-100 rounded-lg shadow-lg py-2 mt-10">
-          <h1 className="text-center font-bold text-2xl">Future Events</h1>
-          <table className="bg-gray-100 w-full text-center mt-2">
+        {/* <div className="bg-green-50 rounded-lg shadow-lg py-2"> */}
+        <h1 className="text-center font-bold text-2xl">My Accepted Requests</h1>
+        {requests.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-lg">No accepted requests found.</p>
+          </div>
+        ) : (
+          <table className="bg-white w-full text-center mt-2">
             <thead>
               <tr className="border-b-2">
-                <th className="p-4">Event Name</th>
-                <th>Date</th>
+                <th className="p-4">Receiver Organization</th>
+                <th>People Count</th>
+                <th>Preferred Time</th>
                 <th>Location</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {events.map((event) => (
-                <tr key={event._id || event.id}>
-                  <td className="p-4">{event.eventName}</td>
-                  <td>{event.date}</td>
-                  <td>{event.location}</td>
+              {requests.map((request) => (
+                <tr key={request._id}>
+                  <td className="p-4">{request.receiver.fullname}</td>
+                  <td>{request.peopleCount}</td>
+                  <td>{request.preferredTime}</td>
+                  <td>{request.location}</td>
+                  <td>
+                    <span
+                      className={`px-2 py-1 rounded text-sm ${
+                        request.status === "Matched"
+                          ? "bg-green-100 text-green-800"
+                          : request.status === "Delivered"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {request.status}
+                    </span>
+                  </td>
+                  <td>
+                    {request.status === "Matched" && (
+                      <button
+                        onClick={() => handleDeliverRequest(request._id)}
+                        disabled={delivering[request._id]}
+                        className={`px-4 py-2 rounded text-white font-medium ${
+                          delivering[request._id]
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700"
+                        }`}
+                      >
+                        {delivering[request._id]
+                          ? "Marking..."
+                          : "Mark as Delivered"}
+                      </button>
+                    )}
+                    {request.status === "Delivered" && (
+                      <span className="text-green-600 font-medium">
+                        ✓ Delivered
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        )}
+        {/* </div> */}
       </div>
     </div>
   );
 }
 
-export default DonorFutureEvents;
+export default MyAcceptedRequests;

@@ -23,8 +23,7 @@ const requestSchema = new mongoose.Schema(
       type: String,
       enum: [
         "Pending",
-        "Matched with Donor",
-        "Out for Delivery",
+        "Matched",
         "Delivered",
         "Declined",
       ],
@@ -32,7 +31,7 @@ const requestSchema = new mongoose.Schema(
     },
     donor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
     },
   },
   { timestamps: true }

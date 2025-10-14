@@ -18,11 +18,6 @@ const eventsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  status: {
-    type: String,
-    enum: ["upcoming", "completed", "cancelled"],
-    default: "upcoming",
-  },
 });
 
 export default mongoose.model("futureEvents", eventsSchema);

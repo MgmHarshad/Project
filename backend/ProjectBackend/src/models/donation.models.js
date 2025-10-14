@@ -35,9 +35,7 @@ let donationSchema = new mongoose.Schema(
       type: String,
       enum: [
         "available",
-        "requested",
         "matched",
-        "out-for-delivery",
         "delivered",
         "expired",
       ],
