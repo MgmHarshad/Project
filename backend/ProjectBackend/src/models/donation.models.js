@@ -24,6 +24,10 @@ let donationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    locationName: {
+      type: String,
+      default: "",
+    },
     expiryDuration: {
       type: Number,
       required: true,

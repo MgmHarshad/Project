@@ -198,7 +198,7 @@ function MyClaimedDonations() {
                   <td>{donation.foodName}</td>
                   <td>{donation.quantity}</td>
                   <td>{donation.unit}</td>
-                  <td>{donation.location}</td>
+                  <td>{donation.locationName || donation.location}</td>
                   <td>{donation.expiryTime}</td>
                   <td>
                     <span

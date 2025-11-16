@@ -7,6 +7,7 @@ import {
   getDonorStats,
 } from "../services/services";
 import { getNotifications } from "../services/services";
+import LocationPicker from "./donor_components/LocationPicker";
 import {
   CircleUserRound,
   Bell,
@@ -24,13 +25,20 @@ import DonorHistory from "./donor_components/DonorHistory";
 function DonorDashboard() {
   const [donor, setDonor] = useState([]);
 
+  const [location, setLocation] = useState({ 
+    latitude: "", 
+    longitude: "", 
+    address: "" 
+  });
+  const [showMap, setShowMap] = useState(false);
+
   const [Donations, setDonations] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [stats, setStats] = useState({
     totalDonations: 0,
     pendingDonations: 0,
     matchedDonations: 0,
-    totalFoodSaved: 0
+    totalFoodSaved: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -96,12 +104,14 @@ function DonorDashboard() {
     fetchStats();
     // fetch unread notifications count
     (async () => {
-      try{
+      try {
         const token = localStorage.getItem("token");
         const res = await getNotifications(token);
-        const count = (res.data || []).filter(n => !n.read).length;
+        const count = (res.data || []).filter((n) => !n.read).length;
         setUnreadCount(count);
-      }catch(e){ /* ignore */ }
+      } catch (e) {
+        /* ignore */
+      }
     })();
   }, []);
 
@@ -131,11 +141,16 @@ function DonorDashboard() {
     console.log("=== DONATION FORM SUBMITTED ===");
     const token = localStorage.getItem("token");
     try {
+      if (!location.latitude || !location.longitude) {
+        alert("Please select pickup location on the map.");
+        return;
+      }
       const payload = {
         foodName: formData.foodName,
         quantity: Number(formData.quantity),
         unit: formData.unit,
-        location: formData.location,
+        location: `${location.latitude},${location.longitude}`,
+        locationName: location.address || "",
         hoursSincePrepared:
           formData.hoursSincePrepared === ""
             ? undefined
@@ -159,6 +174,7 @@ function DonorDashboard() {
         location: "",
         hoursSincePrepared: "",
       });
+      setLocation({ latitude: "", longitude: "", address: "" });
       window.location.href = "/donor";
     } catch (err) {
       console.error("Donation error:", err.response?.data || err.message);
@@ -305,23 +321,37 @@ function DonorDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 text-center items-center cursor-pointer hover:shadow-lg transition-shadow">
             <HandPlatter size={32} className="sm:w-12 sm:h-12" />
-            <p className="text-sm sm:text-base font-bold mt-2">Total Donations</p>
-            <p className="text-lg sm:text-xl font-bold">{stats.totalDonations}</p>
+            <p className="text-sm sm:text-base font-bold mt-2">
+              Total Donations
+            </p>
+            <p className="text-lg sm:text-xl font-bold">
+              {stats.totalDonations}
+            </p>
           </div>
           <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 text-center items-center cursor-pointer hover:shadow-lg transition-shadow">
             <Truck size={32} className="sm:w-12 sm:h-12" />
-            <p className="text-sm sm:text-base font-bold mt-2">Pending Donations</p>
-            <p className="text-lg sm:text-xl font-bold">{stats.pendingDonations}</p>
+            <p className="text-sm sm:text-base font-bold mt-2">
+              Pending Donations
+            </p>
+            <p className="text-lg sm:text-xl font-bold">
+              {stats.pendingDonations}
+            </p>
           </div>
           <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 text-center items-center cursor-pointer hover:shadow-lg transition-shadow">
             <CircleCheck size={32} className="sm:w-12 sm:h-12" />
-            <p className="text-sm sm:text-base font-bold mt-2">Matched Donations</p>
-            <p className="text-lg sm:text-xl font-bold">{stats.matchedDonations}</p>
+            <p className="text-sm sm:text-base font-bold mt-2">
+              Matched Donations
+            </p>
+            <p className="text-lg sm:text-xl font-bold">
+              {stats.matchedDonations}
+            </p>
           </div>
           <div className="bg-gray-100 rounded-lg flex flex-col shadow-md p-4 text-center items-center cursor-pointer hover:shadow-lg transition-shadow">
             <Sprout size={32} className="sm:w-12 sm:h-12" />
             <p className="text-sm sm:text-base font-bold mt-2">Food Saved</p>
-            <p className="text-lg sm:text-xl font-bold">{stats.totalFoodSaved}(kg)</p>
+            <p className="text-lg sm:text-xl font-bold">
+              {stats.totalFoodSaved}(kg)
+            </p>
           </div>
         </div>
 
@@ -331,7 +361,9 @@ function DonorDashboard() {
             onSubmit={handleSubmit}
             className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow-md mb-4"
           >
-            <h3 className="text-xl sm:text-2xl font-bold mb-4">Create Donation</h3>
+            <h3 className="text-xl sm:text-2xl font-bold mb-4">
+              Create Donation
+            </h3>
             <input
               type="text"
               placeholder="Food Name"
@@ -358,7 +390,9 @@ function DonorDashboard() {
                 className="border-b-2 p-2 flex-1 mt-4 focus:outline-none focus:border-b-2 bg-white text-sm sm:text-base"
                 required
               >
-                <option value="" disabled>Select Unit</option>
+                <option value="" disabled>
+                  Select Unit
+                </option>
                 <option value="Kg">Kg</option>
                 <option value="Litres">Litres</option>
                 <option value="Pieces">Pieces</option>
@@ -367,13 +401,24 @@ function DonorDashboard() {
             </div>
             <input
               type="text"
-              placeholder="Location"
+              placeholder="Click to select pickup location"
               name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2 text-sm sm:text-base"
+              value={location.address || ""}
+              onClick={() => setShowMap(true)}
+              readOnly
+              className="border-b-2 p-2 w-full mt-4 focus:outline-none focus:border-b-2 text-sm sm:text-base cursor-pointer bg-white"
               required
             />
+            <LocationPicker 
+              setLocation={setLocation} 
+              isVisible={showMap}
+              onClose={() => setShowMap(false)}
+            />
+            {location.latitude && location.address && (
+              <p className="text-sm text-green-600 mt-2">
+                📍 Location Selected: {location.address}
+              </p>
+            )}
             <input
               type="number"
               placeholder="Hours Since Prepared (optional)"
@@ -399,7 +444,9 @@ function DonorDashboard() {
 
         {/* Recent Donations Table */}
         <div className="w-full bg-gray-100 p-4 rounded-lg shadow-md mb-4">
-          <h3 className="text-xl sm:text-2xl font-bold text-center mb-4">Recent Donations</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-center mb-4">
+            Recent Donations
+          </h3>
           <div className="overflow-x-auto">
             <table className="w-full rounded-lg shadow-md">
               <thead className="bg-gray-300 text-sm sm:text-base lg:text-lg font-bold rounded-lg">
@@ -407,31 +454,58 @@ function DonorDashboard() {
                   <th className="p-2 text-left">Food Name</th>
                   <th className="p-2 text-left">Quantity</th>
                   <th className="p-2 text-left">Unit</th>
-                  <th className="p-2 text-left hidden sm:table-cell">Location</th>
-                  <th className="p-2 text-left hidden lg:table-cell">Expiry Time</th>
+                  <th className="p-2 text-left hidden sm:table-cell">
+                    Location
+                  </th>
+                  <th className="p-2 text-left hidden lg:table-cell">
+                    Expiry Time
+                  </th>
                   <th className="p-2 text-left">Status</th>
-                  <th className="p-2 text-left hidden lg:table-cell">Receiver</th>
+                  <th className="p-2 text-left hidden lg:table-cell">
+                    Receiver
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {Donations.map((Donation) => (
-                  <tr key={Donation._id || Donation.id} className="border-b-2 rounded-b-lg">
-                    <td className="p-2 text-sm sm:text-base">{Donation.foodName}</td>
-                    <td className="p-2 text-sm sm:text-base">{Donation.quantity}</td>
-                    <td className="p-2 text-sm sm:text-base">{Donation.unit}</td>
-                    <td className="p-2 text-sm sm:text-base hidden sm:table-cell">{Donation.location}</td>
-                    <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{Donation.expiryTime}</td>
+                  <tr
+                    key={Donation._id || Donation.id}
+                    className="border-b-2 rounded-b-lg"
+                  >
                     <td className="p-2 text-sm sm:text-base">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        Donation.status === 'available' ? 'bg-green-100 text-green-800' :
-                        Donation.status === 'matched' ? 'bg-yellow-100 text-yellow-800' :
-                        Donation.status === 'delivered' ? 'bg-blue-100 text-blue-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      {Donation.foodName}
+                    </td>
+                    <td className="p-2 text-sm sm:text-base">
+                      {Donation.quantity}
+                    </td>
+                    <td className="p-2 text-sm sm:text-base">
+                      {Donation.unit}
+                    </td>
+                    <td className="p-2 text-sm sm:text-base hidden sm:table-cell">
+                      {Donation.locationName || Donation.location}
+                    </td>
+                    <td className="p-2 text-sm sm:text-base hidden lg:table-cell">
+                      {Donation.expiryTime}
+                    </td>
+                    <td className="p-2 text-sm sm:text-base">
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          Donation.status === "available"
+                            ? "bg-green-100 text-green-800"
+                            : Donation.status === "matched"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : Donation.status === "delivered"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
                         {Donation.status}
                       </span>
                     </td>
-                    <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{Donation.receiver?.fullname || (Donation.receiver ? String(Donation.receiver) : "-")}</td>
+                    <td className="p-2 text-sm sm:text-base hidden lg:table-cell">
+                      {Donation.receiver?.fullname ||
+                        (Donation.receiver ? String(Donation.receiver) : "-")}
+                    </td>
                   </tr>
                 ))}
               </tbody>

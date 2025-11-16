@@ -243,6 +243,7 @@ function ShowDonations() {
                   <th className="p-2 sm:p-4 text-sm sm:text-base">Quantity</th>
                   <th className="p-2 sm:p-4 text-sm sm:text-base">Unit</th>
                   <th className="p-2 sm:p-4 text-sm sm:text-base hidden sm:table-cell">Location</th>
+                  <th className="p-2 sm:p-4 text-sm sm:text-base">Map</th>
                   <th className="p-2 sm:p-4 text-sm sm:text-base hidden lg:table-cell">Expiry Time</th>
                   <th className="p-2 sm:p-4 text-sm sm:text-base">Status</th>
                   <th className="p-2 sm:p-4 text-sm sm:text-base">Action</th>
@@ -255,7 +256,40 @@ function ShowDonations() {
                     <td className="p-2 sm:p-4 text-sm sm:text-base">{donation.foodName}</td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base">{donation.quantity}</td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base">{donation.unit}</td>
-                    <td className="p-2 sm:p-4 text-sm sm:text-base hidden sm:table-cell">{donation.location}</td>
+                    <td className="p-2 sm:p-4 text-sm sm:text-base hidden sm:table-cell">{donation.locationName || donation.location}</td>
+                    <td className="p-2 sm:p-4 text-sm sm:text-base">
+                      {(() => {
+                        const loc = (donation.location || "").trim();
+                        const parts = loc.split(",").map((s) => s.trim());
+                        const hasCoords = parts.length === 2 && parts[0] && parts[1];
+                        const lat = hasCoords ? parts[0] : null;
+                        const lng = hasCoords ? parts[1] : null;
+                        const mapsQuery = hasCoords ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}` : null;
+                        const mapsDir = hasCoords ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${lat},${lng}`)}` : null;
+                        return hasCoords ? (
+                          <div className="flex flex-col gap-1 items-center">
+                            <a
+                              href={mapsQuery}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              View
+                            </a>
+                            <a
+                              href={mapsDir}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              Navigate
+                            </a>
+                          </div>
+                        ) : (
+                          <span>-</span>
+                        );
+                      })()}
+                    </td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base hidden lg:table-cell">{donation.expiryTime}</td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base">
                       <span

@@ -226,7 +226,7 @@ function DonorHistory() {
                     <td className="p-2 sm:p-4 text-sm sm:text-base">{Donation.foodName}</td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base">{Donation.quantity}</td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base">{Donation.unit}</td>
-                    <td className="p-2 sm:p-4 text-sm sm:text-base hidden sm:table-cell">{Donation.location}</td>
+                    <td className="p-2 sm:p-4 text-sm sm:text-base hidden sm:table-cell">{Donation.locationName || Donation.location}</td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base hidden lg:table-cell">{Donation.expiryTime}</td>
                     <td className="p-2 sm:p-4 text-sm sm:text-base">
                       <span className={`px-2 py-1 rounded text-xs ${
