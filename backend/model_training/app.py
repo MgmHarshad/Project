@@ -16,7 +16,7 @@ INVERSE_MAP_PATH = os.path.join(BASE_DIR, "inverse_risk_mapping.pkl")
 CSV_PATH = os.path.join(BASE_DIR, "spoilage_data_expanded.csv")
 
 # Load model + preprocessors
-model = tf.keras.models.load_model(MODEL_PATH)
+model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 ohe = joblib.load(OHE_PATH)
 scaler = joblib.load(SCALER_PATH)
 inverse_risk_mapping = joblib.load(INVERSE_MAP_PATH)
