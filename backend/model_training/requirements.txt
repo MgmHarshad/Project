@@ -1,7 +1,8 @@
-flask
-tensorflow
-scikit-learn
-joblib
-pandas
-numpy
-flask-cors
+flask==3.0.0
+tensorflow-cpu==2.12.0
+scikit-learn==1.3.2
+joblib==1.3.2
+pandas==2.1.4
+numpy==1.24.3
+flask-cors==4.0.0
+gunicorn==21.2.0
