@@ -2,10 +2,12 @@ import { app } from "./app.js";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-// Load environment variables
-dotenv.config({
-  path: "./.env",
-});
+// Load environment variables (only in development, production uses Render env vars)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({
+    path: "./.env",
+  });
+}
 
 if (process.env.MONGO_URI) {
   mongoose
