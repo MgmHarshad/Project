@@ -421,7 +421,7 @@ function DonorDashboard() {
             )}
             <input
               type="number"
-              placeholder="Hours Since Prepared (optional)"
+              placeholder="Hours Since Prepared"
               name="hoursSincePrepared"
               value={formData.hoursSincePrepared}
               onChange={handleChange}
