@@ -31,17 +31,22 @@ const getUserProfile = async (req, res) => {
 const registerUser = async (req, res) => {
   try {
     const { fullname, phno, email, password, role } = req.body;
+
     let profilePicUrl = null;
     if (req.file) {
       const uploadResult = await uploadOnCloudinary(req.file.path);
-      profilePicUrl = uploadResult.secure_url;
-      // cleanup temp file
+      if (uploadResult && uploadResult.secure_url) {
+        profilePicUrl = uploadResult.secure_url;
+      }
+      // temp file cleanup is already handled in uploadOnCloudinary,
+      // but keep this as a safety net
       try {
         fs.unlinkSync(req.file.path);
       } catch (e) {
         /* ignore */
       }
     }
+
     const user = new Users({
       fullname,
       phno,
@@ -50,10 +55,25 @@ const registerUser = async (req, res) => {
       role,
       profilePic: profilePicUrl,
     });
+
     await user.save();
-    res.json(user);
+    return res.json(user);
   } catch (error) {
-    res.status(500).json({ message: "failed to register user" });
+    console.error("Error registering user:", error);
+
+    // Handle duplicate key errors (email / phone already in use)
+    if (error.code === 11000) {
+      const dupFields = Object.keys(error.keyValue || {});
+      const field = dupFields.length ? dupFields[0] : "field";
+      return res.status(409).json({
+        message: `Duplicate ${field}`,
+        field,
+      });
+    }
+
+    return res
+      .status(500)
+      .json({ message: "failed to register user", detail: error.message });
   }
 };
 
