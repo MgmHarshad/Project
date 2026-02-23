@@ -11,7 +11,8 @@ if (process.env.NODE_ENV !== 'production') {
 
 if (process.env.MONGO_URI) {
   mongoose
-    .connect(`${process.env.MONGO_URI}/${process.env.DB_NAME}`)
+    .connect(`${process.env.MONGO_URI}`)
+    // .connect(`${process.env.MONGO_URI}/${process.env.DB_NAME}`)
     .then(() => console.log("MongoDB Connected Successfully"))
     .catch((err) => console.error("MongoDB Error"));
 }
