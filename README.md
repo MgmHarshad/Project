@@ -76,7 +76,6 @@ Food/
 └── .devcontainer/            # Optional dev container (Python-focused)
 ```
 
----
 
 ## Prerequisites
 
